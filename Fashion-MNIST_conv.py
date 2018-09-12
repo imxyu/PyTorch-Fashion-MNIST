@@ -6,7 +6,7 @@ import torchvision
 import matplotlib.pyplot as plt
 
 NUM_TRAINING_SAMPLES = 50000
-EPOCHS = 1000
+EPOCHS = 100
 learning_rate = 0.001
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -53,8 +53,8 @@ class FMNIST_data(torch.utils.data.Dataset):
 FMNIST_tr = FMNIST_data(data_tr, target_tr)
 FMNIST_ts = FMNIST_data(data_ts, target_ts)
 
-loader_tr = torch.utils.data.DataLoader(dataset=FMNIST_tr, batch_size=1024, shuffle=True)
-loader_ts = torch.utils.data.DataLoader(dataset=FMNIST_ts, batch_size=1024, shuffle=True)
+loader_tr = torch.utils.data.DataLoader(dataset=FMNIST_tr, batch_size=4096, shuffle=True)
+loader_ts = torch.utils.data.DataLoader(dataset=FMNIST_ts, batch_size=4096, shuffle=True)
 
 # an example of building a CNN model on PyTorch
 # https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
@@ -109,9 +109,11 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.2)
 
 for iter in range(EPOCHS):
     print('iter:', iter)
+    scheduler.step()
     for ph in phase:
         loss_total = 0
         correct_total = 0

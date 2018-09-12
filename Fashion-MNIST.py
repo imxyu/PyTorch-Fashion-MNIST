@@ -6,7 +6,7 @@ import torchvision
 import matplotlib.pyplot as plt
 
 NUM_TRAINING_SAMPLES = 50000
-EPOCHS = 1000
+EPOCHS = 5
 learning_rate = 0.001
 
 device = torch.device("cuda:0" if torch.cuda.is_available() else "cpu")
@@ -96,6 +96,7 @@ model = model.to(device)
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
 lr_scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=100, gamma=0.5)
+plt.ion()
 
 for iter in range(EPOCHS):
     lr_scheduler.step()
@@ -124,9 +125,19 @@ for iter in range(EPOCHS):
         print('{} loss: {:.6f}'.format(ph, MSE[ph][iter]))
         print('{} acc: {:.6f} %'.format(ph, ACCURACY[ph][iter] * 100))
 
+        plt.cla()
+        plt.ylim([0,1])
+        plt.plot(np.linspace(1, iter+1, iter+1), ACCURACY['train'].detach().numpy()[0: iter+1])
+        plt.pause(0.1)
+        plt.plot(np.linspace(1, iter+1, iter+1), ACCURACY['val'].detach().numpy()[0: iter+1])
+        plt.pause(0.1)
+plt.ioff()
+plt.show()
+
 plt.figure()
 plt.ylabel('Accuracy')
 plt.xlabel('Epochs')
 plt.plot(np.linspace(1,EPOCHS,EPOCHS), ACCURACY['train'].detach().numpy())
 plt.plot(np.linspace(1,EPOCHS,EPOCHS), ACCURACY['val'].detach().numpy())
 plt.show()
+
