@@ -9,8 +9,8 @@ from tensorboardX import SummaryWriter
 writer = SummaryWriter(comment='_se-block-r=2')
 
 NUM_TRAINING_SAMPLES = 50000
-EPOCHS = 100
-learning_rate = 0.001
+EPOCHS = 200
+learning_rate = 1e-5
 
 SEED = 256
 torch.manual_seed(SEED)
@@ -162,7 +162,7 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.2)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=1000, gamma=0.2)
 
 for iter in range(EPOCHS):
     print('iter:', iter)
