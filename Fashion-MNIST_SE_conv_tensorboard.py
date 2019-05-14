@@ -6,7 +6,7 @@ import torchvision
 from tensorboardX import SummaryWriter
 
 # writer = SummaryWriter(comment='_normal_conv')
-writer = SummaryWriter(comment='_se-block')
+writer = SummaryWriter(comment='_se-block-r=2')
 
 NUM_TRAINING_SAMPLES = 50000
 EPOCHS = 100
@@ -25,7 +25,7 @@ dataset = torchvision.datasets.FashionMNIST(root='.')
 
 # 生成随机索引
 order = np.argsort(np.random.random(dataset.train_labels.shape))
-
+print(order)
 # 打乱数据集中样本顺序
 data = dataset.train_data[order].float()
 data = data.float()
@@ -63,20 +63,20 @@ class FMNIST_data(torch.utils.data.Dataset):
 FMNIST_tr = FMNIST_data(data_tr, target_tr)
 FMNIST_ts = FMNIST_data(data_ts, target_ts)
 
-loader_tr = torch.utils.data.DataLoader(dataset=FMNIST_tr, batch_size=2048, shuffle=True)
-loader_ts = torch.utils.data.DataLoader(dataset=FMNIST_ts, batch_size=2048, shuffle=True)
+loader_tr = torch.utils.data.DataLoader(dataset=FMNIST_tr, batch_size=1024, shuffle=True)
+loader_ts = torch.utils.data.DataLoader(dataset=FMNIST_ts, batch_size=1024, shuffle=False)
 
 # an example of building a CNN model on PyTorch
 # https://pytorch.org/tutorials/beginner/blitz/cifar10_tutorial.html
 
 class SE_block(nn.Module):
-    def __init__(self, D_IN, D_OUT, r=8):
+    def __init__(self, D_IN, D_OUT, r=16):
         super(SE_block, self).__init__()
         self.D_IN = D_IN
         self.D_OUT = D_OUT
         self.conv1 = nn.Conv2d(D_IN, D_OUT, kernel_size=3, padding=1)
-        self.fc1 = nn.Linear(D_OUT, r)
-        self.fc2 = nn.Linear(r, D_OUT)
+        self.fc1 = nn.Linear(D_OUT, int(D_OUT/r))
+        self.fc2 = nn.Linear(int(D_OUT/r), D_OUT)
 
     def forward(self, x):
         x = self.conv1(x)
@@ -162,7 +162,7 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=20, gamma=0.2)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
 
 for iter in range(EPOCHS):
     print('iter:', iter)
