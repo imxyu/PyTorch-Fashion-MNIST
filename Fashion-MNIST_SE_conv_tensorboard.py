@@ -162,7 +162,7 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=10, gamma=0.8)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.2)
 
 for iter in range(EPOCHS):
     print('iter:', iter)
