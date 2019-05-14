@@ -9,8 +9,8 @@ from tensorboardX import SummaryWriter
 writer = SummaryWriter(comment='_se-block-r=2')
 
 NUM_TRAINING_SAMPLES = 50000
-EPOCHS = 200
-learning_rate = 1e-5
+EPOCHS = 500
+learning_rate = 1e-4
 
 SEED = 256
 torch.manual_seed(SEED)
@@ -75,11 +75,15 @@ class SE_block(nn.Module):
         self.D_IN = D_IN
         self.D_OUT = D_OUT
         self.conv1 = nn.Conv2d(D_IN, D_OUT, kernel_size=3, padding=1)
+        self.conv1_bn = nn.BatchNorm2d(D_OUT)
         self.fc1 = nn.Linear(D_OUT, int(D_OUT/r))
+        # self.fc1_bn = nn.BatchNorm2d(int(D_OUT/r))
         self.fc2 = nn.Linear(int(D_OUT/r), D_OUT)
+        # self.fc2_bn = nn.BatchNorm2d(int(D_OUT/r))
 
     def forward(self, x):
         x = self.conv1(x)
+        x = self.conv1_bn(x)
         x_keep = x
         x = F.adaptive_avg_pool2d(x, [1, 1])
         x = self.fc1(x.view(-1, self.D_OUT))

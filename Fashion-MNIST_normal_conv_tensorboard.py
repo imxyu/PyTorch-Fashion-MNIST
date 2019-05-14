@@ -9,8 +9,8 @@ writer = SummaryWriter(comment='_normal_conv')
 # writer = SummaryWriter(comment='_se-block-r=2')
 
 NUM_TRAINING_SAMPLES = 50000
-EPOCHS = 100
-learning_rate = 0.001
+EPOCHS = 500
+learning_rate = 1e-4
 
 SEED = 256
 torch.manual_seed(SEED)
@@ -111,16 +111,18 @@ class FMNIST_conv_(nn.Module):
     def __init__(self, D_IN, D_OUT):
         super(FMNIST_conv_, self).__init__()
         self.conv1 = nn.Conv2d(D_IN, 32, kernel_size=3, stride=1, padding=1)
+        self.conv1_bn = nn.BatchNorm2d(32)
         self.pool1 = nn.MaxPool2d(2, 2)
         self.conv2 = nn.Conv2d(32, 32, kernel_size=3, stride=1, padding=1)
+        self.conv2_bn = nn.BatchNorm2d(32)
         self.pool2 = nn.MaxPool2d(2, 2)
         self.dense1 = nn.Linear(7*7*32, 64)
         self.dense2 = nn.Linear(64, 10)
     
     def forward(self, x):
-        out = F.relu(self.conv1(x))
+        out = F.relu(self.conv1_bn(self.conv1(x)))
         out = self.pool1(out)
-        out = F.relu(self.conv2(out))
+        out = F.relu(self.conv2_bn(self.conv2(out)))
         out = self.pool2(out)
 
         out = out.view(-1, 7*7*32)
@@ -162,7 +164,7 @@ model = model.to(device)
 
 criterion = nn.CrossEntropyLoss()
 optimizer = torch.optim.RMSprop(model.parameters(), lr=learning_rate)
-scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=30, gamma=0.2)
+scheduler = torch.optim.lr_scheduler.StepLR(optimizer, step_size=300000, gamma=0.2)
 
 for iter in range(EPOCHS):
     print('iter:', iter)
